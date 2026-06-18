@@ -1,0 +1,1717 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#080808" />
+  <title>Formula Bar Partners</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #080808;
+      --panel: #141414;
+      --panel-2: #1b1b1b;
+      --line: rgba(255, 214, 10, .18);
+      --line-soft: rgba(255, 255, 255, .08);
+      --text: #f7f3df;
+      --muted: #aaa38d;
+      --dim: #706d64;
+      --accent: #ffd60a;
+      --accent-2: #ffe66d;
+      --danger: #ff5a5f;
+      --ok: #4ddf9f;
+      --shadow: 0 14px 34px rgba(0, 0, 0, .24);
+      --radius: 16px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      background:
+        radial-gradient(circle at 18% -8%, rgba(255, 214, 10, .16), transparent 32rem),
+        linear-gradient(145deg, #080808 0%, #11100b 48%, #080808 100%);
+      color: var(--text);
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+    }
+
+    .app {
+      width: min(100%, 520px);
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: max(14px, env(safe-area-inset-top)) 14px max(20px, env(safe-area-inset-bottom));
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 4px 2px 14px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand-logo {
+      width: 58px;
+      height: 58px;
+      display: block;
+      border: 0;
+      border-radius: 50%;
+      background: transparent;
+      box-shadow: 0 10px 26px rgba(255, 214, 10, .18);
+      object-fit: cover;
+      flex: 0 0 auto;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(22px, 7vw, 30px);
+      line-height: .95;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    .sub {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .rate {
+      flex: 0 0 auto;
+      min-width: 66px;
+      padding: 9px 11px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255, 214, 10, .06);
+      text-align: center;
+    }
+
+    .rate b {
+      display: block;
+      color: var(--accent);
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .rate span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .tabs {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(78px, 1fr));
+      gap: 8px;
+      padding: 8px;
+      margin-bottom: 16px;
+      border: 1px solid var(--line-soft);
+      border-radius: 16px;
+      background: rgba(12, 12, 12, .78);
+      backdrop-filter: blur(18px);
+    }
+
+    .auth-screen,
+    .app-shell {
+      display: block;
+    }
+
+    .is-hidden {
+      display: none !important;
+    }
+
+    .role-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .role-card {
+      min-height: 82px;
+      padding: 12px;
+      border: 1px solid var(--line-soft);
+      border-radius: 15px;
+      background: rgba(255, 255, 255, .04);
+      color: var(--text);
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .role-card.active {
+      border-color: rgba(255, 214, 10, .62);
+      background: rgba(255, 214, 10, .11);
+      box-shadow: 0 10px 22px rgba(255, 214, 10, .1);
+    }
+
+    .role-card b {
+      display: block;
+      font-size: 15px;
+      margin-bottom: 6px;
+    }
+
+    .role-card span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .auth-form {
+      display: none;
+    }
+
+    .auth-form.active {
+      display: grid;
+      gap: 10px;
+    }
+
+    .auth-actions {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 10px;
+    }
+
+    .userbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+      padding: 12px;
+      border: 1px solid var(--line-soft);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, .045);
+    }
+
+    .userbar strong {
+      display: block;
+      font-size: 14px;
+    }
+
+    .userbar span {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .link-btn {
+      min-height: 38px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: transparent;
+      color: var(--accent);
+      cursor: pointer;
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    .link-btn.danger {
+      border-color: rgba(255, 90, 95, .34);
+      color: #ffb9bb;
+    }
+
+    .manage-row {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      padding: 11px;
+      border: 1px solid var(--line-soft);
+      border-radius: 14px;
+      background: rgba(0, 0, 0, .22);
+    }
+
+    .tab {
+      min-height: 38px;
+      border-radius: 11px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 700;
+      transition: .18s ease;
+    }
+
+    .tab.active {
+      background: var(--accent);
+      color: #111;
+      box-shadow: 0 10px 24px rgba(255, 214, 10, .24);
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+      animation: rise .22s ease;
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .stat,
+    .card,
+    .profile {
+      border: 1px solid var(--line-soft);
+      background: linear-gradient(180deg, rgba(255, 255, 255, .055), rgba(255, 255, 255, .025));
+      box-shadow: var(--shadow);
+    }
+
+    .stat {
+      min-height: 78px;
+      padding: 12px 10px;
+      border-radius: 15px;
+    }
+
+    .label {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .06em;
+      line-height: 1.2;
+      text-transform: uppercase;
+    }
+
+    .value {
+      margin-top: 8px;
+      color: var(--text);
+      font-size: clamp(19px, 6vw, 26px);
+      font-weight: 900;
+      line-height: .95;
+    }
+
+    .value.accent {
+      color: var(--accent);
+      font-size: clamp(17px, 5.8vw, 24px);
+    }
+
+    .card,
+    .profile {
+      margin-bottom: 12px;
+      padding: 14px;
+      border-radius: var(--radius);
+    }
+
+    .card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 15px;
+      letter-spacing: 0;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .form {
+      display: grid;
+      gap: 10px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 10px;
+    }
+
+    input,
+    select {
+      width: 100%;
+      min-height: 44px;
+      padding: 0 14px;
+      border: 1px solid var(--line-soft);
+      border-radius: 12px;
+      outline: none;
+      background: #0f0f0f;
+      color: var(--text);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .04);
+    }
+
+    input:focus,
+    select:focus {
+      border-color: rgba(255, 214, 10, .62);
+      box-shadow: 0 0 0 4px rgba(255, 214, 10, .1);
+    }
+
+    input::placeholder {
+      color: var(--dim);
+    }
+
+    .btn {
+      min-height: 44px;
+      padding: 0 16px;
+      border-radius: 12px;
+      background: #292929;
+      color: var(--text);
+      cursor: pointer;
+      font-weight: 850;
+      transition: transform .16s ease, filter .16s ease, background .16s ease;
+    }
+
+    .btn:active {
+      transform: scale(.98);
+    }
+
+    .btn.primary {
+      background: var(--accent);
+      color: #121212;
+    }
+
+    .btn:disabled {
+      cursor: not-allowed;
+      filter: grayscale(.65);
+      opacity: .58;
+    }
+
+    .btn.ghost {
+      border: 1px solid var(--line);
+      background: rgba(255, 214, 10, .08);
+      color: var(--accent);
+    }
+
+    .list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .trainer,
+    .sale,
+    .payout {
+      display: grid;
+      align-items: center;
+      gap: 12px;
+      padding: 11px;
+      border: 1px solid var(--line-soft);
+      border-radius: 14px;
+      background: rgba(0, 0, 0, .24);
+    }
+
+    .trainer {
+      grid-template-columns: auto minmax(0, 1fr) auto;
+    }
+
+    .sale,
+    .payout {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .avatar {
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: var(--accent);
+      color: #111;
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .name {
+      overflow: hidden;
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 850;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .meta {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .money {
+      color: var(--accent);
+      font-weight: 900;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .empty {
+      padding: 24px 14px;
+      border: 1px dashed rgba(255, 214, 10, .22);
+      border-radius: 18px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 13px;
+    }
+
+    .message {
+      margin-bottom: 12px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .message.ok {
+      background: rgba(77, 223, 159, .14);
+      color: #adffd8;
+    }
+
+    .message.err {
+      background: rgba(255, 90, 95, .14);
+      color: #ffc3c5;
+    }
+
+    .profile {
+      overflow: hidden;
+      padding: 0;
+    }
+
+    .profile-hero {
+      padding: 16px;
+      background:
+        linear-gradient(135deg, rgba(255, 214, 10, .2), rgba(255, 214, 10, .025)),
+        #151515;
+    }
+
+    .profile-top {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .balance {
+      color: var(--accent);
+      font-size: clamp(32px, 10vw, 46px);
+      font-weight: 900;
+      line-height: .9;
+    }
+
+    .profile-body {
+      padding: 14px;
+    }
+
+    .profile-body > .btn {
+      width: 100%;
+      margin-bottom: 14px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 26px;
+      padding: 0 10px;
+      border-radius: 999px;
+      background: rgba(255, 214, 10, .11);
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .notice {
+      margin-bottom: 14px;
+      padding: 12px 14px;
+      border: 1px solid rgba(255, 214, 10, .26);
+      border-radius: 16px;
+      background: rgba(255, 214, 10, .09);
+      color: var(--accent-2);
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1.4;
+    }
+
+    .danger {
+      color: var(--danger);
+    }
+
+    @media (max-width: 430px) {
+      .app {
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+
+      .topbar {
+        align-items: flex-start;
+      }
+
+      .rate {
+        min-width: 64px;
+        padding: 9px 8px;
+      }
+
+      .stats {
+        gap: 8px;
+      }
+
+      .stat {
+        min-height: 76px;
+        padding: 10px 9px;
+      }
+
+      .row {
+        grid-template-columns: 1fr;
+      }
+
+      .role-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .tab {
+        font-size: 12px;
+      }
+
+      .tabs {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <img class="brand-logo" id="brand-logo" src="formula-bar-logo.png" alt="Formula Bar" />
+        <div>
+          <h1>Formula Bar</h1>
+          <div class="sub">партнёрская мини-апп магазина</div>
+        </div>
+      </div>
+      <div class="rate">
+        <b>10%</b>
+        <span>партнёру</span>
+      </div>
+    </header>
+
+    <section id="auth-screen" class="auth-screen">
+      <div id="msg-auth"></div>
+      <div class="card">
+        <div class="card-head">
+          <h2>Вход в Formula Bar</h2>
+          <span class="badge">роль</span>
+        </div>
+        <div class="role-grid">
+          <button class="role-card is-hidden" type="button" data-auth-role="owner" data-owner-entry>
+            <b>Владелец</b>
+            <span>Управляет продавцами, партнёрами и доступами.</span>
+          </button>
+          <button class="role-card active" type="button" data-auth-role="seller">
+            <b>Продавец</b>
+            <span>Входит по телефону и паролю, записывает продажи и выплаты.</span>
+          </button>
+          <button class="role-card" type="button" data-auth-role="trainer">
+            <b>Партнёр</b>
+            <span>Входит по телефону и паролю, смотрит свой баланс.</span>
+          </button>
+        </div>
+
+        <div id="owner-login" class="auth-form">
+          <input id="owner-pin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="PIN владельца" />
+          <input id="owner-phone-login" type="tel" autocomplete="tel" placeholder="Телефон администратора" />
+          <input id="owner-password-login" type="password" autocomplete="current-password" placeholder="Пароль администратора" />
+          <button class="btn primary" type="button" id="login-owner">Войти в админ-панель</button>
+          <div class="hint">Скрытый вход. Используйте PIN владельца или выданный админ-доступ.</div>
+        </div>
+
+        <div id="seller-login" class="auth-form active">
+          <input id="seller-phone-login" type="tel" autocomplete="tel" placeholder="Телефон продавца" />
+          <input id="seller-password-login" type="password" autocomplete="current-password" placeholder="Пароль" />
+          <button class="btn primary" type="button" id="login-seller">Войти как продавец</button>
+          <div class="hint">Аккаунт продавца создаёт владелец.</div>
+        </div>
+
+        <div id="trainer-login" class="auth-form">
+          <input id="trainer-phone-login" type="tel" autocomplete="tel" placeholder="Ваш номер телефона" />
+          <input id="trainer-password-login" type="password" autocomplete="current-password" placeholder="Пароль" />
+          <button class="btn primary" type="button" id="login-trainer">Войти как партнёр</button>
+          <div class="hint">Аккаунт партнёра создаёт владелец.</div>
+        </div>
+      </div>
+    </section>
+
+    <div id="app-shell" class="app-shell is-hidden">
+      <div class="userbar">
+        <div>
+          <strong id="user-title">Пользователь</strong>
+          <span id="user-subtitle">Formula Bar</span>
+        </div>
+        <button class="link-btn" type="button" id="logout">Выйти</button>
+      </div>
+
+      <nav class="tabs" aria-label="Разделы">
+        <button class="tab active" type="button" data-tab="owner" data-owner-only>Админ</button>
+        <button class="tab" type="button" data-tab="admin" data-seller-only>Продажи</button>
+        <button class="tab" type="button" data-tab="trainer">Партнёр</button>
+        <button class="tab" type="button" data-tab="payouts" data-seller-only>Выплаты</button>
+      </nav>
+
+      <section id="tab-owner" class="screen active">
+      <div id="msg-owner"></div>
+      <div class="stats">
+        <div class="stat">
+          <div class="label">Продавцов</div>
+          <div class="value" id="o-sellers">0</div>
+        </div>
+        <div class="stat">
+          <div class="label">Партнёров</div>
+          <div class="value" id="o-partners">0</div>
+        </div>
+        <div class="stat">
+          <div class="label">Заявок</div>
+          <div class="value accent" id="o-requests">0</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>Доступ к админ-панели</h2>
+          <span class="badge">скрытый вход</span>
+        </div>
+        <div class="form">
+          <div class="row">
+            <input id="admin-new-name" type="text" autocomplete="off" placeholder="Имя администратора" />
+            <input id="admin-new-phone" type="tel" autocomplete="tel" placeholder="Телефон администратора" />
+            <input id="admin-new-password" type="password" autocomplete="new-password" placeholder="Пароль администратора" />
+          </div>
+          <button class="btn primary" type="button" id="add-admin">Разрешить доступ</button>
+          <div class="hint">Скрытый вход открывается пятью нажатиями на логотип или ссылкой с #owner.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>Новый продавец</h2>
+          <span class="badge">доступ</span>
+        </div>
+        <div class="form">
+          <div class="row">
+            <input id="seller-new-name" type="text" autocomplete="off" placeholder="Имя продавца" />
+            <input id="seller-new-phone" type="tel" autocomplete="tel" placeholder="Телефон продавца" />
+            <input id="seller-new-password" type="password" autocomplete="new-password" placeholder="Пароль продавца" />
+          </div>
+          <button class="btn primary" type="button" id="add-seller">Добавить продавца</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>Новый партнёр</h2>
+          <span class="badge">аккаунт</span>
+        </div>
+        <div class="form">
+          <div class="row">
+            <input id="t-name" type="text" autocomplete="off" placeholder="Имя партнёра" />
+            <input id="t-phone" type="tel" autocomplete="tel" placeholder="Телефон партнёра" />
+            <input id="t-password" type="password" autocomplete="new-password" placeholder="Пароль партнёра" />
+          </div>
+          <button class="btn primary" type="button" id="add-trainer">Добавить партнёра</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>Администраторы</h2>
+          <span class="hint" id="admin-list-hint">0 активных</span>
+        </div>
+        <div class="list" id="admin-list"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>Продавцы</h2>
+          <span class="hint" id="seller-list-hint">0 активных</span>
+        </div>
+        <div class="list" id="seller-list"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>Партнёры</h2>
+          <span class="hint" id="owner-partners-hint">0 активных</span>
+        </div>
+        <div class="list" id="owner-partner-list"></div>
+      </div>
+      </section>
+
+      <section id="tab-admin" class="screen">
+      <div id="msg-admin"></div>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="label">Партнёров</div>
+          <div class="value" id="s-trainers">0</div>
+        </div>
+        <div class="stat">
+          <div class="label">Продаж</div>
+          <div class="value" id="s-sales">0</div>
+        </div>
+        <div class="stat">
+          <div class="label">К выплате</div>
+          <div class="value accent" id="s-owed">0 ₸</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>Продажа партнёра</h2>
+          <span class="hint">комиссия считается автоматически</span>
+        </div>
+        <div class="form">
+          <select id="s-trainer"></select>
+          <div class="row">
+            <input id="s-amount" type="number" inputmode="decimal" min="1" placeholder="Сумма покупки, ₸" />
+            <button class="btn primary" type="button" id="add-sale">Записать</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>Партнёры</h2>
+          <span class="hint" id="partners-hint">0 активных</span>
+        </div>
+        <div class="list" id="trainer-list"></div>
+      </div>
+      </section>
+
+      <section id="tab-trainer" class="screen">
+      <div class="card" id="trainer-picker-card">
+        <div class="card-head">
+          <h2>Кабинет партнёра</h2>
+          <span class="badge">live</span>
+        </div>
+        <select id="view-trainer"></select>
+      </div>
+      <div id="trainer-view-content"></div>
+      </section>
+
+      <section id="tab-payouts" class="screen">
+      <div id="msg-payouts"></div>
+      <div class="card">
+        <div class="card-head">
+          <h2>Закрыть баланс</h2>
+          <span class="hint">деньгами или товаром</span>
+        </div>
+        <div class="form">
+          <select id="p-trainer"></select>
+          <div class="row">
+            <select id="p-type">
+              <option value="cash">Деньгами</option>
+              <option value="goods">Товаром</option>
+            </select>
+            <button class="btn primary" type="button" id="add-payout">Выплатить</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>История выплат</h2>
+          <span class="hint" id="payouts-hint">0 операций</span>
+        </div>
+        <div class="list" id="payout-list"></div>
+      </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const STORAGE_KEY = "formula_bar_partner_state_v6";
+    const AUTH_KEY = "formula_bar_auth_v4";
+    const OWNER_PIN = "7777";
+    const COMMISSION = 0.1;
+    const COLORS = ["#ffd60a", "#ffe66d", "#f5b700", "#f9dc5c", "#e8c547"];
+    const SYNC_INTERVAL_MS = 15000;
+    let activeAuthRole = "seller";
+    let ownerAccessUnlocked = false;
+    let currentUser = null;
+    let isSyncing = false;
+
+    let state = {
+      admins: [],
+      sellers: [],
+      trainers: [],
+      sales: [],
+      payouts: [],
+      withdrawalRequests: []
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const fmt = (n) => Math.round(Number(n) || 0).toLocaleString("ru-RU");
+    const today = () => new Date().toLocaleDateString("ru-RU");
+
+    // Общее хранилище на сервере (/api/state), чтобы владелец, продавцы и партнёры
+    // видели одни и те же данные с разных телефонов. Локальный кэш — запасной
+    // вариант на случай временной потери сети.
+    async function storageGet(key) {
+      try {
+        const response = await fetch("/api/state");
+        if (!response.ok) throw new Error("Network error " + response.status);
+        const data = await response.json();
+        if (data.value) localStorage.setItem(key, data.value);
+        return data.value || localStorage.getItem(key);
+      } catch (error) {
+        console.warn("Не удалось загрузить общие данные, используется локальный кэш", error);
+        return localStorage.getItem(key);
+      }
+    }
+
+    async function storageSet(key, value) {
+      localStorage.setItem(key, value);
+      try {
+        const response = await fetch("/api/state", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: value
+        });
+        if (!response.ok) throw new Error("Network error " + response.status);
+      } catch (error) {
+        console.warn("Не удалось сохранить данные на сервере", error);
+      }
+    }
+
+    async function load() {
+      if (isSyncing) return;
+      isSyncing = true;
+      try {
+        const saved = await storageGet(STORAGE_KEY);
+        if (saved) state = JSON.parse(saved);
+        if (!Array.isArray(state.admins)) state.admins = [];
+        if (!Array.isArray(state.sellers)) state.sellers = [];
+        if (!Array.isArray(state.withdrawalRequests)) state.withdrawalRequests = [];
+        state.admins = state.admins.map((admin) => ({
+          ...admin,
+          phone: admin.phone || "",
+          password: admin.password || ""
+        }));
+        state.sellers = state.sellers.map((seller) => ({
+          ...seller,
+          phone: seller.phone || "",
+          password: seller.password || ""
+        }));
+        state.trainers = state.trainers.map((trainer) => ({
+          ...trainer,
+          phone: trainer.phone || trainer.code || "",
+          password: trainer.password || ""
+        }));
+        const savedAuth = sessionStorage.getItem(AUTH_KEY);
+        if (savedAuth) {
+          currentUser = JSON.parse(savedAuth);
+          if (currentUser.role === "owner") ownerAccessUnlocked = true;
+        }
+        if (window.location.hash === "#owner") unlockOwnerAccess(false);
+      } catch (error) {
+        console.warn("State was not loaded", error);
+      } finally {
+        isSyncing = false;
+      }
+      render();
+    }
+
+    async function save() {
+      try {
+        await storageSet(STORAGE_KEY, JSON.stringify(state));
+      } catch (error) {
+        console.warn("State was not saved", error);
+      }
+    }
+
+    function initials(name) {
+      return name.trim().split(/\s+/).map((part) => part[0] || "").join("").slice(0, 2).toUpperCase();
+    }
+
+    function getBalance(trainerId) {
+      const earned = state.sales
+        .filter((sale) => sale.trainerId === trainerId)
+        .reduce((sum, sale) => sum + sale.commission, 0);
+      const paid = state.payouts
+        .filter((payout) => payout.trainerId === trainerId)
+        .reduce((sum, payout) => sum + payout.amount, 0);
+      return earned - paid;
+    }
+
+    function getTrainer(trainerId) {
+      return state.trainers.find((trainer) => trainer.id === Number(trainerId));
+    }
+
+    function getSeller(sellerId) {
+      return state.sellers.find((seller) => seller.id === Number(sellerId));
+    }
+
+    function getAdmin(adminId) {
+      return state.admins.find((admin) => admin.id === Number(adminId));
+    }
+
+    function normalizePhone(phone) {
+      return String(phone || "").replace(/\D/g, "");
+    }
+
+    function displayPhone(trainer) {
+      return trainer.phone || "телефон не указан";
+    }
+
+    function unlockOwnerAccess(showMessageAfterUnlock = true) {
+      ownerAccessUnlocked = true;
+      document.querySelectorAll("[data-owner-entry]").forEach((element) => {
+        element.classList.remove("is-hidden");
+      });
+      setAuthRole("owner");
+      if (showMessageAfterUnlock) showMessage("msg-auth", "Скрытый админ-вход открыт.", true);
+    }
+
+    function hideOwnerAccess() {
+      ownerAccessUnlocked = false;
+      activeAuthRole = "seller";
+      document.querySelectorAll("[data-owner-entry]").forEach((element) => {
+        element.classList.add("is-hidden");
+      });
+      setAuthRole("seller");
+    }
+
+    function setAuthRole(role) {
+      if (role === "owner" && !ownerAccessUnlocked) return;
+      activeAuthRole = role;
+      document.querySelectorAll("[data-auth-role]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.authRole === role);
+      });
+      $("owner-login").classList.toggle("active", role === "owner");
+      $("seller-login").classList.toggle("active", role === "seller");
+      $("trainer-login").classList.toggle("active", role === "trainer");
+    }
+
+    function loginOwner() {
+      const pin = $("owner-pin").value.trim();
+      const phone = normalizePhone($("owner-phone-login").value);
+      const password = $("owner-password-login").value;
+      const admin = state.admins.find((item) => normalizePhone(item.phone) === phone);
+
+      if (pin !== OWNER_PIN && (!admin || !admin.password || admin.password !== password)) {
+        showMessage("msg-auth", "Нет доступа к админ-панели.", false);
+        return;
+      }
+
+      currentUser = { role: "owner", adminId: admin ? admin.id : null, name: admin ? admin.name : "Владелец" };
+      sessionStorage.setItem(AUTH_KEY, JSON.stringify(currentUser));
+      $("owner-pin").value = "";
+      $("owner-phone-login").value = "";
+      $("owner-password-login").value = "";
+      render();
+      switchTab("owner");
+    }
+
+    function loginSeller() {
+      const phone = normalizePhone($("seller-phone-login").value);
+      const password = $("seller-password-login").value;
+      const seller = state.sellers.find((item) => normalizePhone(item.phone) === phone);
+
+      if (!seller) {
+        showMessage("msg-auth", "Аккаунт продавца не найден.", false);
+        return;
+      }
+
+      if (!seller.password || seller.password !== password) {
+        showMessage("msg-auth", "Неверный пароль продавца.", false);
+        return;
+      }
+
+      currentUser = { role: "seller", sellerId: seller.id, name: seller.name };
+      sessionStorage.setItem(AUTH_KEY, JSON.stringify(currentUser));
+      $("seller-phone-login").value = "";
+      $("seller-password-login").value = "";
+      render();
+      switchTab("admin");
+    }
+
+    function loginTrainer() {
+      const phone = normalizePhone($("trainer-phone-login").value);
+      const password = $("trainer-password-login").value;
+      const trainer = state.trainers.find((item) => normalizePhone(item.phone) === phone);
+
+      if (!trainer) {
+        showMessage("msg-auth", "Аккаунт с таким телефоном не найден.", false);
+        return;
+      }
+
+      if (!trainer.password || trainer.password !== password) {
+        showMessage("msg-auth", "Неверный пароль.", false);
+        return;
+      }
+
+      currentUser = { role: "trainer", trainerId: trainer.id, name: trainer.name };
+      sessionStorage.setItem(AUTH_KEY, JSON.stringify(currentUser));
+      $("trainer-phone-login").value = "";
+      $("trainer-password-login").value = "";
+      render();
+      switchTab("trainer");
+    }
+
+    function logout() {
+      currentUser = null;
+      sessionStorage.removeItem(AUTH_KEY);
+      hideOwnerAccess();
+      render();
+    }
+
+    function updateAuthView() {
+      const isLoggedIn = Boolean(currentUser);
+      $("auth-screen").classList.toggle("is-hidden", isLoggedIn);
+      $("app-shell").classList.toggle("is-hidden", !isLoggedIn);
+
+      if (!isLoggedIn) {
+        setAuthRole(activeAuthRole);
+        return;
+      }
+
+      const isOwner = currentUser.role === "owner";
+      const isTrainer = currentUser.role === "trainer";
+      $("user-title").textContent = currentUser.name;
+      $("user-subtitle").textContent = isOwner ? "Владелец Formula Bar" : isTrainer ? "Партнёр Formula Bar" : "Продавец Formula Bar";
+      document.querySelectorAll("[data-owner-only]").forEach((element) => {
+        element.classList.toggle("is-hidden", !isOwner);
+      });
+      document.querySelectorAll("[data-seller-only]").forEach((element) => {
+        element.classList.toggle("is-hidden", isTrainer);
+      });
+      $("trainer-picker-card").classList.toggle("is-hidden", isTrainer);
+    }
+
+    function showMessage(targetId, text, ok = true) {
+      const target = $(targetId);
+      if (!target) return;
+      target.innerHTML = `<div class="message ${ok ? "ok" : "err"}">${escapeHtml(text)}</div>`;
+      window.setTimeout(() => {
+        target.innerHTML = "";
+      }, 2800);
+    }
+
+    async function notifyWithdrawalRequest(trainer, amount) {
+      const response = await fetch("/api/withdrawal-request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          trainerName: trainer.name,
+          phone: trainer.phone,
+          amount,
+          date: today()
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error("Telegram notification failed");
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      }[char]));
+    }
+
+    function optionHtml(selectedValue) {
+      const options = ['<option value="">Выберите партнёра</option>'];
+      state.trainers.forEach((trainer) => {
+        const selected = String(trainer.id) === String(selectedValue) ? " selected" : "";
+        options.push(`<option value="${trainer.id}"${selected}>${escapeHtml(trainer.name)} (${escapeHtml(displayPhone(trainer))})</option>`);
+      });
+      return options.join("");
+    }
+
+    function addAdmin() {
+      if (!currentUser || currentUser.role !== "owner") return;
+      const name = $("admin-new-name").value.trim();
+      const phone = $("admin-new-phone").value.trim();
+      const password = $("admin-new-password").value;
+      const normalizedPhone = normalizePhone(phone);
+
+      if (!name || !normalizedPhone || !password) {
+        showMessage("msg-owner", "Введите имя, телефон и пароль администратора.", false);
+        return;
+      }
+
+      if (password.length < 4) {
+        showMessage("msg-owner", "Пароль администратора должен быть минимум 4 символа.", false);
+        return;
+      }
+
+      if (state.admins.some((admin) => normalizePhone(admin.phone) === normalizedPhone)) {
+        showMessage("msg-owner", "Администратор с таким телефоном уже есть.", false);
+        return;
+      }
+
+      state.admins.push({ id: Date.now(), name, phone, password });
+      $("admin-new-name").value = "";
+      $("admin-new-phone").value = "";
+      $("admin-new-password").value = "";
+      save();
+      render();
+      showMessage("msg-owner", `${name} теперь имеет доступ к админ-панели.`);
+    }
+
+    function deleteAdmin(adminId) {
+      if (!currentUser || currentUser.role !== "owner") return;
+      const admin = getAdmin(adminId);
+      if (!admin) return;
+      if (!confirm(`Убрать админ-доступ у ${admin.name}?`)) return;
+      state.admins = state.admins.filter((item) => item.id !== Number(adminId));
+      save();
+      render();
+      showMessage("msg-owner", `Админ-доступ для ${admin.name} убран.`);
+    }
+
+    function addSeller() {
+      if (!currentUser || currentUser.role !== "owner") return;
+      const name = $("seller-new-name").value.trim();
+      const phone = $("seller-new-phone").value.trim();
+      const password = $("seller-new-password").value;
+      const normalizedPhone = normalizePhone(phone);
+
+      if (!name || !normalizedPhone || !password) {
+        showMessage("msg-owner", "Введите имя, телефон и пароль продавца.", false);
+        return;
+      }
+
+      if (password.length < 4) {
+        showMessage("msg-owner", "Пароль продавца должен быть минимум 4 символа.", false);
+        return;
+      }
+
+      if (state.sellers.some((seller) => normalizePhone(seller.phone) === normalizedPhone)) {
+        showMessage("msg-owner", "Продавец с таким телефоном уже есть.", false);
+        return;
+      }
+
+      state.sellers.push({ id: Date.now(), name, phone, password });
+      $("seller-new-name").value = "";
+      $("seller-new-phone").value = "";
+      $("seller-new-password").value = "";
+      save();
+      render();
+      showMessage("msg-owner", `${name} добавлен как продавец.`);
+    }
+
+    function deleteSeller(sellerId) {
+      if (!currentUser || currentUser.role !== "owner") return;
+      const seller = getSeller(sellerId);
+      if (!seller) return;
+      if (!confirm(`Удалить продавца ${seller.name}?`)) return;
+      state.sellers = state.sellers.filter((item) => item.id !== Number(sellerId));
+      save();
+      render();
+      showMessage("msg-owner", `${seller.name} удалён из продавцов.`);
+    }
+
+    function addTrainer() {
+      if (!currentUser || currentUser.role !== "owner") return;
+      const name = $("t-name").value.trim();
+      const phone = $("t-phone").value.trim();
+      const password = $("t-password").value;
+      const normalizedPhone = normalizePhone(phone);
+
+      if (!name || !normalizedPhone || !password) {
+        showMessage("msg-owner", "Введите имя, телефон и пароль партнёра.", false);
+        return;
+      }
+
+      if (password.length < 4) {
+        showMessage("msg-owner", "Пароль партнёра должен быть минимум 4 символа.", false);
+        return;
+      }
+
+      if (state.trainers.some((trainer) => normalizePhone(trainer.phone) === normalizedPhone)) {
+        showMessage("msg-owner", "Партнёр с таким телефоном уже есть.", false);
+        return;
+      }
+
+      state.trainers.push({ id: Date.now(), name, phone, password });
+      $("t-name").value = "";
+      $("t-phone").value = "";
+      $("t-password").value = "";
+      save();
+      render();
+      showMessage("msg-owner", `${name} добавлен в партнёры.`);
+    }
+
+    function deleteTrainer(trainerId) {
+      if (!currentUser || currentUser.role !== "owner") return;
+      const trainer = getTrainer(trainerId);
+      if (!trainer) return;
+      if (!confirm(`Удалить партнёра ${trainer.name} и его историю?`)) return;
+      const id = Number(trainerId);
+      state.trainers = state.trainers.filter((item) => item.id !== id);
+      state.sales = state.sales.filter((sale) => sale.trainerId !== id);
+      state.payouts = state.payouts.filter((payout) => payout.trainerId !== id);
+      state.withdrawalRequests = state.withdrawalRequests.filter((request) => request.trainerId !== id);
+      save();
+      render();
+      showMessage("msg-owner", `${trainer.name} удалён из партнёров.`);
+    }
+
+    function addSale() {
+      if (!currentUser || !["seller", "owner"].includes(currentUser.role)) return;
+      const trainerId = Number($("s-trainer").value);
+      const amount = Number($("s-amount").value);
+      const trainer = getTrainer(trainerId);
+
+      if (!trainer) {
+        showMessage("msg-admin", "Выберите партнёра.", false);
+        return;
+      }
+
+      if (!amount || amount <= 0) {
+        showMessage("msg-admin", "Введите корректную сумму покупки.", false);
+        return;
+      }
+
+      const roundedAmount = Math.round(amount);
+      const commission = Math.round(roundedAmount * COMMISSION);
+      state.sales.push({ id: Date.now(), trainerId, amount: roundedAmount, commission, date: today() });
+      $("s-amount").value = "";
+      save();
+      render();
+      showMessage("msg-admin", `Продажа записана. ${trainer.name}: +${fmt(commission)} ₸.`);
+    }
+
+    function addPayout() {
+      if (!currentUser || !["seller", "owner"].includes(currentUser.role)) return;
+      const trainerId = Number($("p-trainer").value);
+      const trainer = getTrainer(trainerId);
+
+      if (!trainer) {
+        showMessage("msg-payouts", "Выберите партнёра.", false);
+        return;
+      }
+
+      const balance = getBalance(trainerId);
+      if (balance <= 0) {
+        showMessage("msg-payouts", "У партнёра нет суммы к выплате.", false);
+        return;
+      }
+
+      state.payouts.push({
+        id: Date.now(),
+        trainerId,
+        amount: balance,
+        type: $("p-type").value,
+        date: today()
+      });
+      state.withdrawalRequests = state.withdrawalRequests.map((request) => (
+        request.trainerId === trainerId && request.status === "new"
+          ? { ...request, status: "paid" }
+          : request
+      ));
+      save();
+      render();
+      showMessage("msg-payouts", `${trainer.name}: выплата ${fmt(balance)} ₸ закрыта.`);
+    }
+
+    async function requestWithdrawal() {
+      if (!currentUser || currentUser.role !== "trainer") return;
+      const trainer = getTrainer(currentUser.trainerId);
+      if (!trainer) return;
+
+      const balance = getBalance(trainer.id);
+      if (balance <= 0) {
+        showMessage("trainer-view-content", "Баланс пока пустой, выводить нечего.", false);
+        return;
+      }
+
+      const existing = state.withdrawalRequests.find((request) => (
+        request.trainerId === trainer.id && request.status === "new"
+      ));
+
+      if (existing) {
+        showMessage("trainer-view-content", "Заявка на вывод уже отправлена.", true);
+        return;
+      }
+
+      state.withdrawalRequests.push({
+        id: Date.now(),
+        trainerId: trainer.id,
+        amount: balance,
+        status: "new",
+        date: today()
+      });
+      save();
+      render();
+      try {
+        await notifyWithdrawalRequest(trainer, balance);
+        showMessage("trainer-view-content", `Заявка на вывод ${fmt(balance)} ₸ отправлена продавцу в Telegram.`, true);
+      } catch (error) {
+        showMessage("trainer-view-content", `Заявка сохранена, но Telegram не ответил. Проверьте настройки Vercel.`, false);
+      }
+    }
+
+    function switchTab(name) {
+      if (currentUser && currentUser.role === "trainer" && name !== "trainer") {
+        name = "trainer";
+      }
+      if (currentUser && currentUser.role === "seller" && name === "owner") {
+        name = "admin";
+      }
+      document.querySelectorAll(".tab").forEach((tab) => {
+        tab.classList.toggle("active", tab.dataset.tab === name);
+      });
+      document.querySelectorAll(".screen").forEach((screen) => {
+        screen.classList.toggle("active", screen.id === `tab-${name}`);
+      });
+    }
+
+    function render() {
+      updateAuthView();
+      if (!currentUser) return;
+      if (currentUser.role === "trainer") switchTab("trainer");
+
+      const selectedSaleTrainer = $("s-trainer").value;
+      const selectedViewTrainer = currentUser.role === "trainer" ? currentUser.trainerId : $("view-trainer").value;
+      const selectedPayoutTrainer = $("p-trainer").value;
+      const totalOwed = state.trainers.reduce((sum, trainer) => sum + Math.max(0, getBalance(trainer.id)), 0);
+
+      $("s-trainers").textContent = state.trainers.length;
+      $("s-sales").textContent = state.sales.length;
+      $("s-owed").textContent = `${fmt(totalOwed)} ₸`;
+      $("partners-hint").textContent = `${state.trainers.length} активных`;
+      const newRequests = state.withdrawalRequests.filter((request) => request.status === "new").length;
+      $("payouts-hint").textContent = newRequests ? `${newRequests} заявок` : `${state.payouts.length} операций`;
+
+      $("s-trainer").innerHTML = optionHtml(selectedSaleTrainer);
+      $("view-trainer").innerHTML = optionHtml(selectedViewTrainer);
+      $("p-trainer").innerHTML = optionHtml(selectedPayoutTrainer);
+      if (currentUser.role === "trainer") $("view-trainer").value = currentUser.trainerId;
+
+      renderOwnerPanel();
+      renderTrainerList();
+      renderPayoutList();
+      renderTrainerView();
+    }
+
+    function renderOwnerPanel() {
+      $("o-sellers").textContent = state.sellers.length;
+      $("o-partners").textContent = state.trainers.length;
+      $("o-requests").textContent = state.withdrawalRequests.filter((request) => request.status === "new").length;
+      $("admin-list-hint").textContent = `${state.admins.length} активных`;
+      $("seller-list-hint").textContent = `${state.sellers.length} активных`;
+      $("owner-partners-hint").textContent = `${state.trainers.length} активных`;
+
+      const adminList = $("admin-list");
+      if (!state.admins.length) {
+        adminList.innerHTML = '<div class="empty">Дополнительные администраторы ещё не добавлены.</div>';
+      } else {
+        adminList.innerHTML = state.admins.map((admin, index) => `
+          <div class="manage-row">
+            <div class="avatar" style="background:${COLORS[index % COLORS.length]}">${escapeHtml(initials(admin.name))}</div>
+            <div>
+              <div class="name">${escapeHtml(admin.name)}</div>
+              <div class="meta">${escapeHtml(displayPhone(admin))}</div>
+            </div>
+            <button class="link-btn danger" type="button" data-delete-admin="${admin.id}">Удалить</button>
+          </div>
+        `).join("");
+      }
+
+      const sellerList = $("seller-list");
+      if (!state.sellers.length) {
+        sellerList.innerHTML = '<div class="empty">Продавцы ещё не добавлены.</div>';
+      } else {
+        sellerList.innerHTML = state.sellers.map((seller, index) => `
+          <div class="manage-row">
+            <div class="avatar" style="background:${COLORS[index % COLORS.length]}">${escapeHtml(initials(seller.name))}</div>
+            <div>
+              <div class="name">${escapeHtml(seller.name)}</div>
+              <div class="meta">${escapeHtml(displayPhone(seller))}</div>
+            </div>
+            <button class="link-btn danger" type="button" data-delete-seller="${seller.id}">Удалить</button>
+          </div>
+        `).join("");
+      }
+
+      const partnerList = $("owner-partner-list");
+      if (!state.trainers.length) {
+        partnerList.innerHTML = '<div class="empty">Партнёры ещё не добавлены.</div>';
+      } else {
+        partnerList.innerHTML = state.trainers.map((trainer, index) => `
+          <div class="manage-row">
+            <div class="avatar" style="background:${COLORS[index % COLORS.length]}">${escapeHtml(initials(trainer.name))}</div>
+            <div>
+              <div class="name">${escapeHtml(trainer.name)}</div>
+              <div class="meta">${escapeHtml(displayPhone(trainer))} · баланс ${fmt(getBalance(trainer.id))} ₸</div>
+            </div>
+            <button class="link-btn danger" type="button" data-delete-trainer="${trainer.id}">Удалить</button>
+          </div>
+        `).join("");
+      }
+    }
+
+    function renderTrainerList() {
+      const list = $("trainer-list");
+      if (!state.trainers.length) {
+        list.innerHTML = '<div class="empty">Партнёры ещё не добавлены.</div>';
+        return;
+      }
+
+      list.innerHTML = state.trainers.map((trainer, index) => {
+        const salesCount = state.sales.filter((sale) => sale.trainerId === trainer.id).length;
+        const balance = getBalance(trainer.id);
+        return `
+          <div class="trainer">
+            <div class="avatar" style="background:${COLORS[index % COLORS.length]}">${escapeHtml(initials(trainer.name))}</div>
+            <div>
+              <div class="name">${escapeHtml(trainer.name)}</div>
+              <div class="meta">${escapeHtml(displayPhone(trainer))} · ${salesCount} продаж</div>
+            </div>
+            <div class="money">${fmt(balance)} ₸</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderPayoutList() {
+      const list = $("payout-list");
+      const requests = state.withdrawalRequests
+        .filter((request) => request.status === "new")
+        .map((request) => ({ ...request, kind: "request" }));
+      const payouts = [...state.payouts].reverse().map((payout) => ({ ...payout, kind: "payout" }));
+      const rows = [...requests, ...payouts];
+
+      if (!rows.length) {
+        list.innerHTML = '<div class="empty">Выплат пока не было.</div>';
+        return;
+      }
+
+      list.innerHTML = rows.map((row) => {
+        const trainer = getTrainer(row.trainerId);
+        const type = row.kind === "request"
+          ? "запрос на вывод"
+          : row.type === "cash" ? "деньгами" : "товаром";
+        const badge = row.kind === "request" ? '<span class="badge">новая заявка</span>' : "";
+        return `
+          <div class="payout">
+            <div>
+              <div class="name">${escapeHtml(trainer ? trainer.name : "Партнёр удалён")}</div>
+              <div class="meta">${row.date} · ${type}</div>
+            </div>
+            <div>
+              <div class="money">${fmt(row.amount)} ₸</div>
+              ${badge}
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderTrainerView() {
+      const trainerId = currentUser && currentUser.role === "trainer"
+        ? Number(currentUser.trainerId)
+        : Number($("view-trainer").value);
+      const trainer = getTrainer(trainerId);
+      const target = $("trainer-view-content");
+
+      if (!trainer) {
+        target.innerHTML = '<div class="empty">Выберите партнёра, чтобы открыть его кабинет.</div>';
+        return;
+      }
+
+      const sales = state.sales.filter((sale) => sale.trainerId === trainerId);
+      const payouts = state.payouts.filter((payout) => payout.trainerId === trainerId);
+      const earned = sales.reduce((sum, sale) => sum + sale.commission, 0);
+      const paid = payouts.reduce((sum, payout) => sum + payout.amount, 0);
+      const balance = earned - paid;
+      const index = state.trainers.findIndex((item) => item.id === trainerId);
+      const pendingRequest = state.withdrawalRequests.find((request) => (
+        request.trainerId === trainerId && request.status === "new"
+      ));
+      const requestButton = currentUser && currentUser.role === "trainer"
+        ? `<button class="btn primary" type="button" data-withdraw-request ${balance <= 0 || pendingRequest ? "disabled" : ""}>${pendingRequest ? "Заявка отправлена" : "Запросить вывод"}</button>`
+        : "";
+      const requestNotice = pendingRequest
+        ? `<div class="notice">Заявка на вывод ${fmt(pendingRequest.amount)} ₸ уже отправлена продавцу.</div>`
+        : "";
+
+      const saleRows = sales.length
+        ? [...sales].reverse().map((sale) => `
+          <div class="sale">
+            <div>
+              <div class="name">${fmt(sale.amount)} ₸</div>
+              <div class="meta">${sale.date}</div>
+            </div>
+            <div class="money">+${fmt(sale.commission)} ₸</div>
+          </div>
+        `).join("")
+        : '<div class="empty">Продаж по этому партнёру пока нет.</div>';
+
+      target.innerHTML = `
+        <article class="profile">
+          <div class="profile-hero">
+            <div class="profile-top">
+              <div class="avatar" style="background:${COLORS[index % COLORS.length]}">${escapeHtml(initials(trainer.name))}</div>
+              <div>
+                <div class="name">${escapeHtml(trainer.name)}</div>
+                <div class="meta">партнёр Formula Bar</div>
+              </div>
+            </div>
+            <div class="label">Баланс</div>
+            <div class="balance">${fmt(balance)} ₸</div>
+            <div class="meta">Заработано ${fmt(earned)} ₸ · получено ${fmt(paid)} ₸</div>
+          </div>
+          <div class="profile-body">
+            ${requestNotice}
+            ${requestButton}
+            <div class="card-head">
+              <h2>История продаж</h2>
+              <span class="hint">${sales.length} записей</span>
+            </div>
+            <div class="list">${saleRows}</div>
+          </div>
+        </article>
+      `;
+    }
+
+    document.addEventListener("click", async (event) => {
+      const roleButton = event.target.closest("[data-auth-role]");
+      if (roleButton) setAuthRole(roleButton.dataset.authRole);
+
+      const tab = event.target.closest(".tab");
+      if (tab) switchTab(tab.dataset.tab);
+
+      const withdrawButton = event.target.closest("[data-withdraw-request]");
+      if (withdrawButton && !withdrawButton.disabled) requestWithdrawal();
+
+      const deleteSellerButton = event.target.closest("[data-delete-seller]");
+      if (deleteSellerButton) deleteSeller(deleteSellerButton.dataset.deleteSeller);
+
+      const deleteAdminButton = event.target.closest("[data-delete-admin]");
+      if (deleteAdminButton) deleteAdmin(deleteAdminButton.dataset.deleteAdmin);
+
+      const deleteTrainerButton = event.target.closest("[data-delete-trainer]");
+      if (deleteTrainerButton) deleteTrainer(deleteTrainerButton.dataset.deleteTrainer);
+
+      const copyButton = event.target.closest("[data-copy]");
+      if (copyButton) {
+        try {
+          await navigator.clipboard.writeText(copyButton.dataset.copy);
+          copyButton.textContent = "Готово";
+          window.setTimeout(() => { copyButton.textContent = "Копировать"; }, 1400);
+        } catch (error) {
+          copyButton.textContent = "Скопируйте";
+        }
+      }
+    });
+
+    $("login-owner").addEventListener("click", loginOwner);
+    $("login-seller").addEventListener("click", loginSeller);
+    $("login-trainer").addEventListener("click", loginTrainer);
+    $("logout").addEventListener("click", logout);
+    $("add-admin").addEventListener("click", addAdmin);
+    $("add-seller").addEventListener("click", addSeller);
+    $("add-trainer").addEventListener("click", addTrainer);
+    $("add-sale").addEventListener("click", addSale);
+    $("add-payout").addEventListener("click", addPayout);
+    $("view-trainer").addEventListener("change", renderTrainerView);
+
+    let logoTapCount = 0;
+    let logoTapTimer = null;
+    $("brand-logo").addEventListener("click", () => {
+      logoTapCount += 1;
+      window.clearTimeout(logoTapTimer);
+      logoTapTimer = window.setTimeout(() => { logoTapCount = 0; }, 1400);
+      if (logoTapCount >= 5) {
+        logoTapCount = 0;
+        unlockOwnerAccess(true);
+      }
+    });
+
+    ["owner-pin", "owner-phone-login", "owner-password-login"].forEach((id) => {
+      $(id).addEventListener("keydown", (event) => {
+        if (event.key === "Enter") loginOwner();
+      });
+    });
+
+    ["admin-new-name", "admin-new-phone", "admin-new-password"].forEach((id) => {
+      $(id).addEventListener("keydown", (event) => {
+        if (event.key === "Enter") addAdmin();
+      });
+    });
+
+    ["seller-phone-login", "seller-password-login"].forEach((id) => {
+      $(id).addEventListener("keydown", (event) => {
+        if (event.key === "Enter") loginSeller();
+      });
+    });
+
+    ["trainer-phone-login", "trainer-password-login"].forEach((id) => {
+      $(id).addEventListener("keydown", (event) => {
+        if (event.key === "Enter") loginTrainer();
+      });
+    });
+
+    ["seller-new-name", "seller-new-phone", "seller-new-password"].forEach((id) => {
+      $(id).addEventListener("keydown", (event) => {
+        if (event.key === "Enter") addSeller();
+      });
+    });
+
+    ["t-name", "t-phone", "t-password", "s-amount"].forEach((id) => {
+      $(id).addEventListener("keydown", (event) => {
+        if (event.key !== "Enter") return;
+        if (id === "s-amount") addSale();
+        else addTrainer();
+      });
+    });
+
+    if (window.Telegram && window.Telegram.WebApp) {
+      window.Telegram.WebApp.ready();
+      window.Telegram.WebApp.expand();
+    }
+
+    load();
+    // Периодически подтягиваем свежие данные с сервера, чтобы разные
+    // телефоны (владелец/продавцы/партнёры) видели актуальную картину.
+    window.setInterval(() => {
+      if (document.visibilityState === "visible") load();
+    }, SYNC_INTERVAL_MS);
+  </script>
+</body>
+</html>
